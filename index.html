@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Greenhouse Melon</title>
+<style>
+:root{--ink:#0f1f17;--mute:#5a7064;--solid:#fff;--card:rgba(255,255,255,.72);--line:rgba(16,80,50,.12);--ac:#10b981;--ac2:#06b6d4;--ok:#059669;--warn:#d97706;--bad:#dc2626;--chip:rgba(16,80,50,.06);--bg:#f1faf6;--bga:#bdf0d6;--bgb:#c3e2ff;--sh:0 1px 1px rgba(10,50,30,.04),0 14px 34px -10px rgba(10,60,40,.2);--soil1:#8a5a37;--soil2:#5b3820;--in1:#dff5e8;--in2:#9bd5b4;--frame:#5b7083;--glass1:rgba(255,255,255,.55);--glass2:rgba(150,210,255,.16);--hill1:#6cc785;--hill2:#2f8f55;--grd:#44a257}
+:root[data-theme=dark]{--ink:#e8f3ec;--mute:#93aa9d;--solid:#121f19;--card:rgba(20,34,28,.72);--line:rgba(160,230,200,.13);--chip:rgba(160,230,200,.07);--bg:#07110d;--bga:#0b3a2a;--bgb:#0c2d52;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--sh:0 14px 38px -12px rgba(0,0,0,.65);--in1:#12301f;--in2:#0b1a14;--frame:#9fb4c4;--glass1:rgba(180,220,255,.16);--glass2:rgba(80,160,255,.06);--hill1:#1f6040;--hill2:#0f3a24;--grd:#18502e}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.45 "Inter","Segoe UI",system-ui,-apple-system,sans-serif;background:radial-gradient(900px 520px at 5% -8%,var(--bga),transparent 62%),radial-gradient(820px 520px at 102% 0,var(--bgb),transparent 58%),var(--bg);background-attachment:fixed;transition:background .3s}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px}
+.lg{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--ac2));box-shadow:0 10px 22px -8px color-mix(in srgb,var(--ac) 75%,transparent)}
+h1{font:700 25px/1.1 "Inter",system-ui,sans-serif;letter-spacing:-.02em;margin:0;background:linear-gradient(90deg,var(--ink),color-mix(in srgb,var(--ac) 65%,var(--ink)));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{margin:3px 0 0;color:var(--mute);font-size:13px}
+.sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pl 2.2s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}70%,100%{box-shadow:0 0 0 8px transparent}}
+.pill.warn .dot{background:var(--warn)}
+.demo{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:0;font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+.ib{width:40px;height:40px;border-radius:13px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(10px);font-size:17px;transition:transform .15s}
+.ib:hover{transform:translateY(-1px);border-color:var(--ac)}
+button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.spin{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh)}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.scene{overflow:hidden;border-radius:26px}
+.scene svg{display:block;width:100%;height:auto}
+#sc{--s1:#43a4ff;--s2:#d9f2ff;--sunc:#ffd54a;--cld:rgba(255,255,255,.85);--lab:#0b2a3c;--halo:rgba(255,255,255,.6)}
+#sc.dusk{--s1:#5b4fc9;--s2:#ffc7a2;--sunc:#ff9f43;--cld:rgba(255,226,210,.75);--lab:#2b1740;--halo:rgba(255,235,220,.6)}
+#sc.night{--s1:#040a1c;--s2:#1c2f66;--cld:rgba(140,160,220,.22);--lab:#e8eefc;--halo:rgba(4,10,28,.65)}
+#sc text{fill:var(--lab);font:600 13px "Inter",system-ui,sans-serif;paint-order:stroke;stroke:var(--halo);stroke-width:3.5px;stroke-linejoin:round}
+#sc #vs{fill:#fff;stroke:rgba(8,40,20,.55)}
+#sc.night #sun,#sc:not(.night) #moon,#stars{opacity:0}
+#sc.night #stars{opacity:1}
+#sun,#moon,#stars{transition:opacity .7s}
+.cl{fill:var(--cld);animation:dr 24s ease-in-out infinite alternate}
+.cl.b{animation-duration:32s;animation-direction:alternate-reverse}
+@keyframes dr{from{transform:translateX(-26px)}to{transform:translateX(34px)}}
+#sc [data-m]{cursor:pointer;transition:filter .2s}
+#sc [data-m]:hover{filter:brightness(1.15) drop-shadow(0 0 6px rgba(255,255,255,.6))}
+#glow{opacity:0;transition:opacity .6s}
+#glow.on{opacity:1}
+#drops{opacity:0}
+#drops.on{opacity:1}
+.drop{animation:fall 1.2s ease-in infinite}
+@keyframes fall{from{transform:translateY(0);opacity:1}to{transform:translateY(72px);opacity:0}}
+#blades.on{animation:sp .7s linear infinite;transform-box:fill-box;transform-origin:center}
+.side{display:grid;gap:14px;align-content:start}
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.m{text-align:left;padding:14px 14px 10px;border-radius:20px;border:1px solid var(--line);position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 17%,var(--solid)),var(--solid) 64%);box-shadow:var(--sh);transition:transform .15s,box-shadow .2s}
+.m:hover{transform:translateY(-2px)}
+.m.on{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 24%,transparent),var(--sh)}
+.m span{color:var(--mute);font-size:13px;font-weight:500}
+.m b{display:block;font:700 32px/1.15 "Inter",system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 50%,var(--ink)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.m small{font:500 13px system-ui;margin-left:3px;-webkit-text-fill-color:var(--mute)}
+.m svg{width:100%;height:30px;margin-top:6px}
+.bd{position:absolute;top:12px;right:12px;font-size:11px;font-weight:600;font-style:normal;padding:3px 9px;border-radius:99px;background:color-mix(in srgb,var(--sc) 16%,transparent);color:var(--sc)}
+.ok{--sc:var(--ok)}.warn{--sc:var(--warn)}.bad{--sc:var(--bad)}.na{--sc:var(--mute)}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
+.act{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;padding:10px 12px;border-radius:14px;background:var(--chip);transition:background .3s}
+.act i{width:10px;height:10px;border-radius:50%;background:var(--mute);opacity:.5}
+.act.on{background:linear-gradient(135deg,color-mix(in srgb,var(--ok) 24%,transparent),color-mix(in srgb,var(--ac2) 10%,transparent))}
+.act.on i{background:var(--ok);opacity:1;box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.act em{margin-left:auto;font-style:normal;font-size:12px;color:var(--mute)}
+.hist{margin-top:16px;padding:18px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.bar h2{font:700 18px "Inter",system-ui,sans-serif;letter-spacing:-.01em;margin:0 10px 0 0;padding-left:12px;border-left:4px solid;border-image:linear-gradient(180deg,var(--ac),var(--ac2)) 1}
+.tab{padding:7px 14px;border-radius:11px;border:1px solid var(--line);background:var(--chip);font-size:13px;font-weight:500;transition:transform .15s}
+.tab:hover{border-color:var(--ac);transform:translateY(-1px)}
+.tab.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#fff;box-shadow:0 6px 14px -6px color-mix(in srgb,var(--ac) 80%,transparent)}
+.chw{position:relative}
+#ch{width:100%;height:auto;display:block;touch-action:pan-y}
+#ch .gl{stroke:var(--line)}
+#ch .ax{fill:var(--mute);font-size:11px}
+#tp{position:absolute;pointer-events:none;background:linear-gradient(135deg,#0f2a1f,#0b3b3a);color:#e8fff5;padding:6px 10px;border-radius:10px;font-size:12px;white-space:nowrap;transform:translate(-50%,-130%);display:none;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.stats div{background:linear-gradient(145deg,var(--chip),transparent);border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:12px;color:var(--mute)}
+.stats b{display:block;color:var(--ink);font-size:16px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mute);font-weight:500}
+tr:hover td{background:var(--chip)}
+.tg{font-size:11px;padding:2px 7px;border-radius:7px;background:var(--chip);color:var(--mute)}
+.tg.on{background:linear-gradient(135deg,var(--ok),var(--ac2));color:#fff}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--bad);color:#fff;padding:10px 16px;border-radius:12px;display:none;font-size:14px;max-width:90vw}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+.dsel{display:flex;align-items:center;gap:6px}
+.dsel input{height:40px;padding:0 10px;border-radius:13px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(10px);color:var(--ink);font:inherit;font-size:14px}
+.dsel input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.dsel .ib:disabled{opacity:.4;cursor:default;transform:none}
+.pill.arc .dot{background:var(--ac2);animation:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="lg"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-8a8 8 0 0 1 16 0v8M3 20h18M12 4v16M8 20v-9M16 20v-9"/></svg></span>
+  <div><h1>Greenhouse Melon</h1><p>Madusari, Secang, Magelang</p></div>
+  <span class="sp"></span>
+  <span class="pill demo" id="demo" hidden>Data contoh</span>
+  <span class="pill" id="live"><i class="dot"></i><span id="lt">Memuat…</span></span>
+  <div class="dsel"><button class="ib" id="dp" title="Hari sebelumnya" aria-label="Hari sebelumnya">‹</button><input type="date" id="dt" aria-label="Pilih tanggal"><button class="ib" id="dn" title="Hari berikutnya" aria-label="Hari berikutnya">›</button><button class="tab" id="d0">Hari ini</button></div>
+  <button class="ib" id="rf" title="Muat ulang" aria-label="Muat ulang">⟳</button>
+  <button class="ib" id="th" title="Ganti tema" aria-label="Ganti tema">🌙</button>
+</header>
+
+<section class="hero">
+  <div class="card scene">
+  <svg id="sc" viewBox="0 0 440 300" role="img" aria-label="Ilustrasi greenhouse yang menampilkan kondisi terkini">
+    <defs>
+      <linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s1)"/><stop offset="1" style="stop-color:var(--s2)"/></linearGradient>
+      <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--hill1)"/><stop offset="1" style="stop-color:var(--hill2)"/></linearGradient>
+      <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--grd)"/><stop offset="1" style="stop-color:var(--hill2)"/></linearGradient>
+      <linearGradient id="in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--in1)"/><stop offset="1" style="stop-color:var(--in2)"/></linearGradient>
+      <linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--glass1)"/><stop offset=".55" style="stop-color:var(--glass2)"/><stop offset="1" style="stop-color:var(--glass1)"/></linearGradient>
+      <linearGradient id="sd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--soil1)"/><stop offset="1" style="stop-color:var(--soil2)"/></linearGradient>
+      <linearGradient id="ml" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eefabf"/><stop offset="1" stop-color="#9cc656"/></linearGradient>
+      <linearGradient id="lf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#74d56e"/><stop offset="1" stop-color="#2b9a4b"/></linearGradient>
+      <linearGradient id="dp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8be0ff"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+      <linearGradient id="tm" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f97316"/><stop offset="1" stop-color="#ef4444"/></linearGradient>
+      <linearGradient id="cn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0" stop-opacity=".55"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></linearGradient>
+      <radialGradient id="gl"><stop offset="0" stop-color="#fff6c0" stop-opacity=".95"/><stop offset="1" stop-color="#fde68a" stop-opacity="0"/></radialGradient>
+      <radialGradient id="sg"><stop offset="0" style="stop-color:var(--sunc)" stop-opacity=".6"/><stop offset="1" style="stop-color:var(--sunc)" stop-opacity="0"/></radialGradient>
+      <clipPath id="gh"><path d="M100 232V150C100 100 160 58 224 52C288 58 348 100 348 150V232Z"/></clipPath>
+    </defs>
+    <rect width="440" height="300" fill="url(#sk)"/>
+    <g id="stars" fill="#fff"><circle cx="150" cy="30" r="1.3"/><circle cx="210" cy="18" r="1"/><circle cx="268" cy="40" r="1.4"/><circle cx="330" cy="22" r="1"/><circle cx="392" cy="48" r="1.3"/><circle cx="120" cy="64" r="1"/><circle cx="360" cy="84" r="1"/><circle cx="24" cy="110" r="1.2"/></g>
+    <g class="cl"><ellipse cx="300" cy="52" rx="28" ry="9"/><ellipse cx="284" cy="45" rx="15" ry="10"/><ellipse cx="314" cy="43" rx="17" ry="11"/></g>
+    <g class="cl b"><ellipse cx="170" cy="84" rx="20" ry="7"/><ellipse cx="160" cy="79" rx="11" ry="7"/><ellipse cx="180" cy="78" rx="12" ry="8"/></g>
+    <g id="sun" data-m="lux"><title>Cahaya</title><circle cx="68" cy="60" r="48" fill="url(#sg)"/><circle cx="68" cy="60" r="20" style="fill:var(--sunc)"/><path d="M68 26v-8M68 102v-8M34 60h-8M110 60h-8M44 36l-6-6M98 84l6 6M98 36l6-6M44 84l-6 6" style="stroke:var(--sunc)" stroke-width="3" stroke-linecap="round" fill="none"/></g>
+    <g id="moon" data-m="lux"><title>Cahaya</title><circle cx="70" cy="58" r="44" fill="#9db4ff" opacity=".18"/><path d="M64 38a24 24 0 1 0 26 32a20 20 0 0 1-26-32z" fill="#e8eefc"/></g>
+    <path d="M0 214C60 180 120 190 180 206S330 196 440 174V300H0Z" fill="url(#hl)" opacity=".85"/>
+    <path d="M0 240C80 222 170 236 240 236S380 224 440 232V300H0Z" fill="url(#gd)"/>
+    <path d="M100 232V150C100 100 160 58 224 52C288 58 348 100 348 150V232Z" fill="url(#in)"/>
+    <g id="glow"><path d="M206 98L158 214H290L242 98Z" fill="url(#cn)"/><circle cx="224" cy="106" r="86" fill="url(#gl)"/></g>
+    <g id="plants"></g>
+    <path d="M112 126H336" stroke="#7b8794" stroke-width="3" stroke-linecap="round"/>
+    <g fill="#94a3b8"><circle cx="140" cy="127" r="2.3"/><circle cx="182" cy="127" r="2.3"/><circle cx="224" cy="127" r="2.3"/><circle cx="266" cy="127" r="2.3"/><circle cx="308" cy="127" r="2.3"/></g>
+    <g id="drops"><g class="drop"><path d="M140 130c3 4 4 6 4 8a4 4 0 0 1-8 0c0-2 1-4 4-8z" fill="url(#dp)"/></g><g class="drop" style="animation-delay:.25s"><path d="M182 130c3 4 4 6 4 8a4 4 0 0 1-8 0c0-2 1-4 4-8z" fill="url(#dp)"/></g><g class="drop" style="animation-delay:.5s"><path d="M224 130c3 4 4 6 4 8a4 4 0 0 1-8 0c0-2 1-4 4-8z" fill="url(#dp)"/></g><g class="drop" style="animation-delay:.75s"><path d="M266 130c3 4 4 6 4 8a4 4 0 0 1-8 0c0-2 1-4 4-8z" fill="url(#dp)"/></g><g class="drop" style="animation-delay:.95s"><path d="M308 130c3 4 4 6 4 8a4 4 0 0 1-8 0c0-2 1-4 4-8z" fill="url(#dp)"/></g></g>
+    <g data-m="soil"><title>Tanah</title><rect id="bed" x="112" y="214" width="224" height="18" rx="5" fill="url(#sd)"/><rect x="108" y="211" width="232" height="6" rx="3" fill="#c89256"/></g>
+    <g data-m="lux"><title>Lampu</title><path d="M224 56V84" stroke="#64748b" stroke-width="2"/><path d="M206 98L212 84H236L242 98Z" fill="#94a3b8" stroke="#64748b" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="224" cy="99" rx="9" ry="4" fill="#fff3b0"/></g>
+    <g data-m="temp"><title>Kipas</title><circle cx="318" cy="160" r="20" fill="var(--solid)" stroke="var(--frame)" stroke-width="3"/><g id="blades"><ellipse cx="318" cy="150" rx="4" ry="9" fill="#64748b"/><ellipse cx="318" cy="170" rx="4" ry="9" fill="#64748b"/><ellipse cx="308" cy="160" rx="9" ry="4" fill="#64748b"/><ellipse cx="328" cy="160" rx="9" ry="4" fill="#64748b"/></g><circle cx="318" cy="160" r="3.5" fill="var(--frame)"/></g>
+    <g clip-path="url(#gh)"><path d="M118 232L206 40H236L148 232Z" fill="#fff" opacity=".17"/><path d="M262 232L318 100H330L284 232Z" fill="#fff" opacity=".11"/><rect x="100" y="40" width="248" height="200" fill="url(#gs)"/>
+      <path d="M148 40V232M186 40V232M224 40V232M262 40V232M300 40V232M100 150H348M110 104H338" stroke="var(--frame)" stroke-width="2" opacity=".5" fill="none"/></g>
+    <path d="M100 232V150C100 100 160 58 224 52C288 58 348 100 348 150V232Z" fill="none" stroke="var(--frame)" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="92" y="230" width="264" height="10" rx="3" fill="#8795a1"/>
+    <g fill="url(#lf)"><ellipse cx="42" cy="248" rx="24" ry="12"/><ellipse cx="66" cy="252" rx="18" ry="10"/><ellipse cx="400" cy="250" rx="24" ry="12"/><ellipse cx="378" cy="254" rx="16" ry="9"/></g>
+    <g data-m="temp"><title>Suhu</title><rect x="48" y="122" width="12" height="62" rx="6" fill="var(--solid)" stroke="var(--frame)" stroke-width="2"/><circle cx="54" cy="192" r="11" fill="url(#tm)"/><rect id="mer" x="51.5" y="150" width="5" height="34" rx="2.5" fill="url(#tm)"/><path d="M63 134h5M63 148h5M63 162h5M63 176h5" stroke="var(--frame)" stroke-width="1.5" stroke-linecap="round"/></g>
+    <g data-m="hum"><title>Kelembapan udara</title><path d="M392 138q-18 24-18 38a18 18 0 0 0 36 0q0-14-18-38z" fill="url(#dp)"/><ellipse cx="385" cy="170" rx="3.5" ry="6" fill="#fff" opacity=".4" transform="rotate(20 385 170)"/></g>
+    <text id="vt" x="54" y="224" text-anchor="middle"></text>
+    <text id="vh" x="392" y="218" text-anchor="middle"></text>
+    <text id="vl" x="68" y="118" text-anchor="middle"></text>
+    <text id="vs" x="224" y="266" text-anchor="middle"></text>
+  </svg>
+  </div>
+  <div class="side">
+    <div class="mets" id="mets"></div>
+    <div class="card acts" id="acts"></div>
+  </div>
+</section>
+
+<section class="card hist">
+  <div class="bar"><h2>Data historis</h2>
+    <span id="mt"></span><span class="sp"></span><span id="rt"></span></div>
+  <div class="chw"><svg id="ch" viewBox="0 0 800 270"></svg><div id="tp"></div></div>
+  <div class="stats" id="st"></div>
+</section>
+
+<section class="card hist">
+  <div class="bar"><h2 id="tt">Pembacaan terbaru</h2><span class="sp"></span><button class="tab" id="csv">Unduh CSV</button></div>
+  <div class="tw"><table id="tb"></table></div>
+</section>
+</div>
+<div id="toast" role="alert"></div>
+
+<script>
+// ===== PENGATURAN =====
+const CFG={
+  API_URL:'https://script.google.com/macros/s/AKfycbwl_ebXPPr8yLIOtMO-SEA8EVSotx338XFxskD3IcKBvsZAbaEHaKPtoyU3ZNSc1abg/exec',   // URL Web App Apps Script (…/exec). Kosong = data contoh
+  READ_TOKEN:'gh-81f7ad35b965',   // harus sama dengan READ_TOKEN di Code.gs
+  DAYS:14,           // jumlah hari yang dimuat saat halaman dibuka (maks 14)
+  REFRESH_MS:60000, INTERVAL_MIN:5, STALE_MIN:15
+};
+const M={
+  temp:{n:'Suhu',u:'°C',c:'#f97316',r:[22,32],d:1},
+  hum:{n:'RH udara',u:'%',c:'#0ea5e9',r:[55,80],d:0},
+  soil:{n:'Tanah',u:'%',c:'#16a34a',r:[50,85],d:0},
+  lux:{n:'Cahaya',u:'lx',c:'#ca8a04',r:null,d:0}
+};
+const $=i=>document.getElementById(i),
+  f=(v,d=0)=>v==null?'—':v.toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d}),
+  hm=t=>t.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Jakarta'}).replace('.',':'),
+  dm=t=>t.toLocaleDateString('id-ID',{day:'numeric',month:'short',timeZone:'Asia/Jakarta'}),
+  todayStr=()=>new Date(Date.now()+252e5).toISOString().slice(0,10),
+  dayOf=t=>new Date(+t+252e5).toISOString().slice(0,10),
+  shift=(d,n)=>new Date(Date.parse(d+'T00:00:00Z')+n*864e5).toISOString().slice(0,10);
+let rows=[],cur=[],sel='temp',rng=1,pts=[],day='',follow=true,first=true;
+const CW=800,CH=270;
+
+// ----- tema -----
+const root=document.documentElement;
+function theme(t){root.dataset.theme=t;$('th').textContent=t=='dark'?'☀️':'🌙';try{localStorage.setItem('gh-theme',t)}catch(e){}}
+let saved=null;try{saved=localStorage.getItem('gh-theme')}catch(e){}
+theme(saved||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+$('th').onclick=()=>theme(root.dataset.theme=='dark'?'light':'dark');
+
+// ----- data -----
+function demo(){
+  const o=[],now=Date.now();
+  for(let i=4032;i>=0;i--){
+    const t=new Date(now-i*3e5),h=t.getHours()+t.getMinutes()/60,day=Math.max(0,Math.sin((h-6)/12*Math.PI));
+    const temp=+(23.5+8*day+Math.sin(i/9)*.7).toFixed(1),hum=Math.round(80-20*day+Math.cos(i/11)*3),
+      soil=Math.round(62+12*Math.sin(i/35)),lux=Math.round(day*30000+(day>0?Math.sin(i/5)*1500:0)),
+      light=(h>=17&&h<22&&lux<5000)?1:0;
+    o.push({t,temp,hum,soil,lux,fan:temp>=30?1:0,pump:soil<52?1:0,light});
+  }
+  return o;
+}
+function parse(a){
+  return a.map(r=>({t:new Date(r[0]+'T'+r[1]+'+07:00'),temp:r[2],hum:r[3],soil:r[4],lux:r[5],fan:r[6],pump:r[7],light:r[8]}))
+    .filter(r=>!isNaN(r.t)).sort((a,b)=>a.t-b.t);
+}
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',5000)}
+function merge(a){const m=new Map(rows.map(r=>[+r.t,r]));a.forEach(r=>m.set(+r.t,r));rows=[...m.values()].sort((x,y)=>x.t-y.t)}
+async function api(body){
+  // POST "text/plain" = permintaan sederhana (tanpa preflight CORS) yang diterima Apps Script
+  const r=await fetch(CFG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({key:CFG.READ_TOKEN},body))});
+  const j=await r.json();if(!j.ok)throw new Error(j.error||'respons tidak valid');
+  return parse(j.rows);
+}
+const tried=new Set();
+async function ensure(){   // muat data tanggal yang dipilih bila belum ada di memori
+  if(!CFG.API_URL)return;
+  const k=day+'|'+rng;if(tried.has(k))return;
+  const have=new Set(rows.map(r=>dayOf(r.t)));let miss=false;
+  for(let i=0;i<rng;i++)if(!have.has(shift(day,-i)))miss=true;
+  if(!miss)return;
+  tried.add(k);$('rf').classList.add('spin');
+  try{
+    merge(await api({date:day,days:rng}));render();
+    if(!rows.some(r=>dayOf(r.t)==day)&&(Date.parse(todayStr())-Date.parse(day))/864e5>CFG.DAYS)
+      toast('Tanggal ini belum bisa dimuat. Tempel Code.gs terbaru lalu deploy New version agar tanggal lama bisa dibuka.');
+  }catch(e){toast('Gagal memuat tanggal ('+e.message+')')}
+  $('rf').classList.remove('spin');
+}
+async function load(){
+  $('rf').classList.add('spin');
+  try{
+    if(CFG.API_URL){merge(await api({days:first?CFG.DAYS:2}));$('demo').hidden=true}
+    else{rows=demo();$('demo').hidden=false}
+    first=false;render();
+  }catch(e){toast('Gagal memuat data ('+e.message+'). Pastikan Code.gs terbaru sudah di-deploy sebagai New version dan READ_TOKEN sama.')}
+  $('rf').classList.remove('spin');
+}
+function go(d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;
+  const t=todayStr();day=d>t?t:d;follow=day>=t;
+  render();ensure();
+}
+$('rf').onclick=load;
+
+// ----- status -----
+function status(k,v){
+  const r=M[k].r;
+  if(v==null)return['na','Tidak ada'];
+  if(!r)return['ok','Info'];
+  if(v>=r[0]&&v<=r[1])return['ok','Normal'];
+  const m=(r[1]-r[0])*.25;
+  return(v>=r[0]-m&&v<=r[1]+m)?['warn','Perhatian']:['bad','Di luar rentang'];
+}
+function spark(k){
+  const d=cur.slice(-48).map(r=>r[k]).filter(v=>v!=null);
+  if(d.length<2)return'';
+  const lo=Math.min(...d),hi=Math.max(...d),s=(hi-lo)||1;
+  return'<svg viewBox="0 0 100 28" preserveAspectRatio="none"><path d="'+d.map((v,i)=>(i?'L':'M')+(i/(d.length-1)*100).toFixed(1)+' '+(26-(v-lo)/s*24).toFixed(1)).join('')+'" fill="none" stroke="'+M[k].c+'" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+}
+
+// ----- render -----
+function render(){
+  const tod=todayStr();if(follow)day=tod;
+  $('dt').value=day;$('dt').max=tod;$('dn').disabled=day>=tod;
+  cur=rows.filter(r=>dayOf(r.t)==day);
+  const has=cur.length>0;
+  const l=has?cur[cur.length-1]:{t:new Date(day+'T12:00:00+07:00'),temp:null,hum:null,soil:null,lux:null,fan:0,pump:0,light:0};
+  if(day==tod){
+    const age=Math.round((Date.now()-l.t)/6e4),old=age>CFG.STALE_MIN;
+    $('live').className='pill'+(!has||old?' warn':'');
+    $('lt').textContent=!has?'Belum ada data hari ini':old?'Data terlambat, terakhir '+hm(l.t)+' ('+age+' mnt lalu)':'Terbaru pukul '+hm(l.t)+' ('+age+' mnt lalu)';
+  }else{
+    $('live').className='pill arc';
+    $('lt').textContent='Arsip '+dm(l.t)+(has?', '+cur.length+' data':', tidak ada data');
+  }
+  $('mets').innerHTML=Object.keys(M).map(k=>{
+    const m=M[k],[c,tx]=status(k,l[k]);
+    return'<button class="m '+c+(sel==k?' on':'')+'" data-k="'+k+'" style="--c:'+m.c+'"><span>'+m.n+'</span><i class="bd">'+tx+'</i><b>'+f(l[k],m.d)+'<small>'+m.u+'</small></b>'+spark(k)+'</button>';
+  }).join('');
+  $('acts').innerHTML=[['fan','Kipas'],['pump','Pompa'],['light','Lampu']].map(a=>'<div class="act'+(l[a[0]]?' on':'')+'"><i></i>'+a[1]+'<em>'+(l[a[0]]?'Hidup':'Mati')+'</em></div>').join('');
+  $('tt').textContent=day==tod?'Pembacaan terbaru':'Pembacaan terakhir, '+dm(l.t);
+  scene(l);chart();table();
+}
+function scene(l){
+  const h=(l.t.getUTCHours()+7)%24;
+  $('sc').classList.toggle('night',h<5||h>=19);$('sc').classList.toggle('dusk',(h>=5&&h<7)||(h>=17&&h<19));
+  $('blades').classList.toggle('on',!!l.fan);
+  $('drops').classList.toggle('on',!!l.pump);
+  $('glow').classList.toggle('on',!!l.light);
+  $('bed').style.opacity=l.soil==null?1:(.55+Math.min(l.soil,100)/100*.45);
+  const tt=l.temp==null?0:Math.max(0,Math.min(1,(l.temp-15)/25));
+  $('mer').setAttribute('y',184-tt*34);$('mer').setAttribute('height',tt*34+2);
+  $('vt').textContent=f(l.temp,1)+'°';
+  $('vh').textContent=f(l.hum)+'%';
+  $('vl').textContent=f(l.lux)+' lx';
+  $('vs').textContent='Tanah '+f(l.soil)+'%';
+}
+(function(){ // tanaman melon
+  let s='';
+  [140,182,224,266,308].forEach((x,i)=>{
+    const d=i%2?-1:1;
+    s+='<path d="M'+x+' 216C'+(x-7)+' 190 '+(x+7)+' 158 '+x+' 124" stroke="#3b9a47" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    '<path transform="translate('+x+' 182) scale('+d+' 1)" d="M0 0q18-3 24-20q-20 0-24 20z" fill="url(#lf)"/>'+
+    '<path transform="translate('+x+' 152) scale('+(-d)+' 1)" d="M0 0q18-3 24-20q-20 0-24 20z" fill="url(#lf)"/>'+
+    '<circle cx="'+(x+12)+'" cy="200" r="10" fill="url(#ml)" stroke="#8fb552" stroke-width="1.2"/>'+
+    '<path d="M'+(x+5)+' 196q7 5 14 0M'+(x+5)+' 204q7 5 14 0M'+(x+12)+' 191v18" stroke="#8fb552" stroke-width=".9" fill="none" opacity=".8"/>';
+  });
+  $('plants').innerHTML=s;
+})();
+
+// ----- grafik historis -----
+function win(){   // rentang berakhir pada tanggal terpilih (WIB)
+  const s=Date.parse(day+'T00:00:00+07:00');
+  return[s-(rng-1)*864e5,s+864e5];
+}
+function chart(){
+  const k=sel,m=M[k],[a,b]=win(),d=rows.filter(r=>r.t>=a&&r.t<=b&&r[k]!=null),
+    L=44,R=12,T=12,B=28,g=$('ch');
+  $('mt').innerHTML=Object.keys(M).map(q=>'<button class="tab'+(q==k?' on':'')+'" data-k="'+q+'">'+M[q].n+'</button>').join(' ');
+  $('rt').innerHTML=[[1,'1 hari'],[3,'3 hari'],[7,'7 hari']].map(q=>'<button class="tab'+(q[0]==rng?' on':'')+'" data-r="'+q[0]+'">'+q[1]+'</button>').join(' ');
+  if(!d.length){g.innerHTML='<text x="400" y="135" text-anchor="middle" class="ax">Belum ada data pada rentang ini</text>';$('st').innerHTML='';pts=[];return}
+  const vals=d.map(r=>r[k]);
+  let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(m.r){lo=Math.min(lo,m.r[0]);hi=Math.max(hi,m.r[1])}
+  const p=(hi-lo||1)*.1;lo-=p;hi+=p;if(k!='temp'&&lo<0)lo=0;
+  const x=t=>L+(t-a)/(b-a)*(CW-L-R),y=v=>T+(1-(v-lo)/(hi-lo))*(CH-T-B);
+  let s='';
+  for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4,yy=y(v).toFixed(1);s+='<line x1="'+L+'" x2="'+(CW-R)+'" y1="'+yy+'" y2="'+yy+'" class="gl"/><text x="'+(L-6)+'" y="'+(+yy+4)+'" text-anchor="end" class="ax">'+f(v,k=='temp'?1:0)+'</text>'}
+  if(m.r)s+='<rect x="'+L+'" y="'+y(m.r[1]).toFixed(1)+'" width="'+(CW-L-R)+'" height="'+(y(m.r[0])-y(m.r[1])).toFixed(1)+'" fill="'+m.c+'" opacity=".11"/>';
+  if(rng==1)for(let i=0;i<=4;i++)s+='<text x="'+x(a+i*216e5).toFixed(1)+'" y="'+(CH-8)+'" text-anchor="middle" class="ax">'+String(i*6).padStart(2,'0')+':00</text>';
+  else for(let i=0;i<rng;i++){const t=a+i*864e5;s+='<text x="'+x(t).toFixed(1)+'" y="'+(CH-8)+'" text-anchor="middle" class="ax">'+dm(new Date(t+36e5))+'</text>'}
+  pts=d.map(r=>({x:x(r.t),y:y(r[k]),r}));
+  let path='',area='',seg=[];const base=CH-B,fl=()=>{if(seg.length)area+='M'+seg[0].x.toFixed(1)+' '+base+seg.map(q=>'L'+q.x.toFixed(1)+' '+q.y.toFixed(1)).join('')+'L'+seg[seg.length-1].x.toFixed(1)+' '+base+'Z';seg=[]};
+  pts.forEach((q,i)=>{const c=i&&q.r.t-pts[i-1].r.t<18e5;if(!c)fl();path+=(c?'L':'M')+q.x.toFixed(1)+' '+q.y.toFixed(1);seg.push(q)});fl();
+  s+='<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+m.c+'" stop-opacity=".38"/><stop offset="1" stop-color="'+m.c+'" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#ag)"/><path d="'+path+'" fill="none" stroke="'+m.c+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>'+
+     '<line id="cx" y1="'+T+'" y2="'+(CH-B)+'" stroke="'+m.c+'" stroke-dasharray="3 3" style="display:none"/><circle id="cd" r="5" fill="'+m.c+'" stroke="#fff" stroke-width="2" style="display:none"/>';
+  g.innerHTML=s;
+
+  const avg=vals.reduce((u,v)=>u+v,0)/vals.length,w=rows.filter(r=>r.t>=a&&r.t<=b),
+    on=q=>Math.round(w.filter(r=>r[q]).length*CFG.INTERVAL_MIN);
+  $('st').innerHTML=[['Terendah',f(Math.min(...vals),m.d)+' '+m.u],['Tertinggi',f(Math.max(...vals),m.d)+' '+m.u],['Rata-rata',f(avg,m.d)+' '+m.u],
+    ['Kipas hidup','± '+f(on('fan'))+' menit'],['Pompa hidup','± '+f(on('pump'))+' menit'],['Lampu hidup','± '+f(on('light'))+' menit']]
+    .map(q=>'<div>'+q[0]+'<b>'+q[1]+'</b></div>').join('');
+}
+$('ch').onpointermove=e=>{
+  if(!pts.length)return;
+  const bb=$('ch').getBoundingClientRect(),mx=(e.clientX-bb.left)/bb.width*CW;
+  let lo=0,hi=pts.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(pts[mid].x<mx)lo=mid;else hi=mid}
+  const q=Math.abs(pts[lo].x-mx)<Math.abs(pts[hi].x-mx)?pts[lo]:pts[hi],m=M[sel];
+  const cx=$('cx'),cd=$('cd'),tp=$('tp');
+  cx.setAttribute('x1',q.x);cx.setAttribute('x2',q.x);cd.setAttribute('cx',q.x);cd.setAttribute('cy',q.y);
+  cx.style.display=cd.style.display='block';
+  tp.style.display='block';tp.style.left=(q.x/CW*bb.width)+'px';tp.style.top=(q.y/CH*bb.height)+'px';
+  tp.textContent=dm(q.r.t)+' '+hm(q.r.t)+'  |  '+f(q.r[sel],m.d)+' '+m.u;
+};
+$('ch').onpointerleave=()=>{const c=$('cx');if(c)c.style.display=$('cd').style.display='none';$('tp').style.display='none'};
+
+// ----- tabel & CSV -----
+function table(){
+  const pill=(v,n)=>'<span class="tg'+(v?' on':'')+'">'+n+'</span>',L=cur.slice(-12).reverse();
+  $('tb').innerHTML='<tr><th>Waktu</th><th>Suhu °C</th><th>RH %</th><th>Tanah %</th><th>Cahaya lx</th><th>Alat</th></tr>'+
+    (L.length?L.map(r=>'<tr><td>'+dm(r.t)+' '+hm(r.t)+'</td><td>'+f(r.temp,1)+'</td><td>'+f(r.hum)+'</td><td>'+f(r.soil)+'</td><td>'+f(r.lux)+'</td><td>'+pill(r.fan,'K')+' '+pill(r.pump,'P')+' '+pill(r.light,'L')+'</td></tr>').join('')
+    :'<tr><td colspan="6" style="text-align:center;color:var(--mute);padding:18px">Tidak ada data pada tanggal ini</td></tr>');
+}
+$('csv').onclick=()=>{
+  if(!rows.length)return;
+  const [a,b]=win(),p=n=>String(n).padStart(2,'0');
+  const body=rows.filter(r=>r.t>=a&&r.t<=b).map(r=>[new Date(+r.t+252e5).toISOString().slice(0,16).replace('T',' '),r.temp,r.hum,r.soil,r.lux,r.fan,r.pump,r.light].map(v=>v==null?'':v).join(',')).join('\n');
+  const A=document.createElement('a');
+  A.href=URL.createObjectURL(new Blob(['waktu,suhu,rh,tanah,lux,kipas,pompa,lampu\n'+body],{type:'text/csv'}));
+  A.download='greenhouse-'+day+(rng>1?'-'+rng+'hari':'')+'.csv';A.click();
+};
+
+// ----- interaksi -----
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-k],[data-r],[data-m]');
+  if(!t)return;
+  if(t.dataset.r){rng=+t.dataset.r;ensure()}
+  else sel=t.dataset.k||t.dataset.m;
+  render();
+  if(t.dataset.m)$('ch').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+$('dt').onchange=e=>go(e.target.value);
+$('dp').onclick=()=>go(shift(day,-1));
+$('dn').onclick=()=>go(shift(day,1));
+$('d0').onclick=()=>go(todayStr());
+day=todayStr();$('dt').value=day;$('dt').max=day;$('dn').disabled=true;
+load();setInterval(load,CFG.REFRESH_MS);
+</script>
+</body>
+</html>
